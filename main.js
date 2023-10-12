@@ -1,14 +1,30 @@
 const fs = require('fs');
-const readline = require('readline');
 
-const filePath = 'output.txt';
+const inputFile = 'data.json';
 
-const rl = readline.createInterface({
-    input: fs.createReadStream(filePath),
-    output: process.stdout,
-    terminal: false
-});
-rl.on('line', (line) => {
-    console.log(JSON.parse(line)["exchangedate"], JSON.parse(line)["rate"])
+fs.readFile(inputFile, 'utf8', (err, data) => {
+    if (err) {
+        console.error('Error reading', err);
+        return;
+    }
 
+    try {
+        const jsonData = JSON.parse(data);
+
+        const necessaryData = jsonData.map(item => `${item.exchangedate}:${item.rate}`);
+
+        const outputData = necessaryData.join('\n');
+
+        const outputFile = 'output.txt';
+
+        fs.writeFile(outputFile, outputData, 'utf8', err => {
+            if (err) {
+                console.error('Error writing', err);
+                return;
+            }
+            console.log('Data written to output.txt');
+        });
+    } catch (jsonParseError) {
+        console.error('Error:', jsonParseError);
+    }
 });
